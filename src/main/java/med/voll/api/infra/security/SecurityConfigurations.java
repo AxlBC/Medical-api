@@ -25,14 +25,21 @@ public class SecurityConfigurations {
     @Autowired
     private SecurityFilter securityFilter;
 
+    // http://server:port/context-path/swagger-ui.html
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a.requestMatchers(HttpMethod.POST, "/login")
-                        .permitAll()
-                        .anyRequest().authenticated())
+                        .permitAll())
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class);
+
+        http.authorizeHttpRequests(a -> a.requestMatchers("/swagger-ui.html",
+                "/v3/api-docs/**","/swagger-ui/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated());
 
         return http.build();
     }
